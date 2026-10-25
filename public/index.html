@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101017">
+  <meta name="description" content="Race your friends up the ChronoClimb tower with quick-fire year trivia.">
+  <title>ChronoClimb — time is your rival</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { ink: '#101017', panel: '#191922', lime: '#d6ff62', muted: '#9696a4' }, fontFamily: { display: ['Arial', 'sans-serif'] } } } };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; --lime: #d6ff62; --ink: #101017; --panel: #191922; --line: #30303c; --muted: #9696a4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--ink); color: #f5f5f7; font-family: 'Space Grotesk', sans-serif; }
+    body::before { content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .18; background-image: radial-gradient(#737382 0.6px, transparent 0.6px); background-size: 17px 17px; mask-image: linear-gradient(to bottom, #000, transparent 80%); }
+    button, input { font: inherit; }
+    .mono { font-family: 'DM Mono', monospace; }
+    .shell { width: min(1120px, calc(100% - 36px)); margin: 0 auto; position: relative; z-index: 1; }
+    .topbar { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #292933; }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: white; font-weight: 700; letter-spacing: -.04em; font-size: 19px; }
+    .brand-mark { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--lime); color: var(--ink); font-weight: 700; transform: rotate(-5deg); }
+    .eyebrow { color: var(--lime); text-transform: uppercase; letter-spacing: .17em; font: 500 10px 'DM Mono', monospace; }
+    .btn { border: 1px solid var(--line); color: #f4f4f5; background: #20202a; border-radius: 12px; padding: 12px 17px; font-weight: 600; cursor: pointer; transition: .18s ease; }
+    .btn:hover { border-color: #666675; transform: translateY(-1px); }
+    .btn-primary { background: var(--lime); color: #171a0b; border-color: var(--lime); }
+    .btn-primary:hover { background: #e2ff95; border-color: #e2ff95; }
+    .btn-quiet { background: transparent; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .card { border: 1px solid #30303c; background: linear-gradient(145deg, rgba(31,31,42,.96), rgba(22,22,30,.96)); border-radius: 22px; }
+    .home-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 54px; align-items: center; padding: 76px 0 80px; }
+    .hero h1 { font-size: clamp(44px, 7vw, 78px); line-height: .98; letter-spacing: -.075em; margin: 18px 0 20px; max-width: 590px; }
+    .hero h1 em { color: var(--lime); font-style: normal; }
+    .hero p { color: #b5b5c1; font-size: 16px; line-height: 1.65; max-width: 460px; margin: 0; }
+    .hero-stats { display: flex; gap: 28px; margin-top: 36px; }
+    .hero-stats strong { display: block; font-size: 20px; letter-spacing: -.04em; }
+    .hero-stats span { color: var(--muted); font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .1em; }
+    .join-card { padding: 28px; }
+    .join-card h2 { font-size: 22px; margin: 8px 0 7px; letter-spacing: -.04em; }
+    .join-card .sub { color: var(--muted); margin: 0 0 22px; font-size: 13px; }
+    .field-label { display: block; color: #b8b8c3; font: 10px 'DM Mono', monospace; letter-spacing: .1em; text-transform: uppercase; margin: 18px 0 8px; }
+    .field { width: 100%; height: 48px; border-radius: 11px; padding: 0 14px; border: 1px solid #373744; outline: none; background: #111117; color: white; }
+    .field:focus { border-color: var(--lime); box-shadow: 0 0 0 3px #d6ff6218; }
+    .create-btn { width: 100%; margin-top: 12px; }
+    .divider { display: flex; align-items: center; gap: 12px; color: #737380; margin: 17px 0; font: 10px 'DM Mono', monospace; text-transform: uppercase; }
+    .divider::before, .divider::after { content: ''; height: 1px; background: #353540; flex: 1; }
+    .join-row { display: grid; grid-template-columns: 1fr auto; gap: 9px; }
+    .code-field { text-transform: uppercase; letter-spacing: .22em; font-family: 'DM Mono', monospace; }
+    .preview { min-height: 405px; padding: 25px; overflow: hidden; position: relative; }
+    .preview::after { content: ''; position: absolute; width: 280px; height: 280px; border-radius: 50%; background: #d6ff620e; filter: blur(2px); right: -105px; bottom: -140px; }
+    .preview-head { display: flex; justify-content: space-between; align-items: center; }
+    .live-pill { color: var(--lime); border: 1px solid #d6ff623d; border-radius: 50px; padding: 6px 9px; font: 9px 'DM Mono', monospace; }
+    .mini-tower { display: flex; gap: 16px; height: 275px; margin-top: 18px; position: relative; }
+    .tower-rail { flex: 1; display: flex; flex-direction: column-reverse; justify-content: space-between; position: relative; }
+    .tower-rail::before { content: ''; position: absolute; left: 47px; top: 7px; bottom: 7px; width: 2px; background: linear-gradient(to top, #444450, #d6ff6266); }
+    .tower-level { height: 23px; position: relative; color: #72727e; font: 9px 'DM Mono', monospace; }
+    .tower-level::after { content: ''; position: absolute; left: 40px; top: 10px; width: 16px; height: 1px; background: #454550; }
+    .tower-level.goal { color: var(--lime); }
+    .avatar-dot { width: 30px; height: 30px; position: absolute; left: 33px; bottom: 27px; border-radius: 50%; display: grid; place-items: center; color: #181a0e; font-size: 13px; font-weight: 700; background: var(--lime); box-shadow: 0 0 24px #d6ff6250; animation: float 3s ease-in-out infinite; }
+    .avatar-dot.second { bottom: 77px; left: 68px; background: #8fe2ff; color: #101017; animation-delay: -.8s; }
+    @keyframes float { 50% { transform: translateY(-7px); } }
+    .preview-note { position: absolute; bottom: 23px; left: 24px; right: 24px; display: flex; justify-content: space-between; color: #9b9ba7; font: 10px 'DM Mono', monospace; }
+    .view { padding: 40px 0 70px; }
+    .room-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .room-code { display: inline-flex; align-items: center; gap: 10px; font: 17px 'DM Mono', monospace; letter-spacing: .16em; color: var(--lime); border: 1px solid #3c3c47; border-radius: 11px; padding: 10px 13px; background: #191920; }
+    .lobby-grid { display: grid; grid-template-columns: 1fr .8fr; gap: 20px; }
+    .pane { padding: 25px; }
+    .pane h2 { font-size: 24px; letter-spacing: -.05em; margin: 3px 0 7px; }
+    .muted { color: var(--muted); }
+    .player-list { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 9px; }
+    .player-row { min-height: 58px; display: flex; align-items: center; gap: 12px; padding: 9px 12px; border: 1px solid #32323d; background: #16161d; border-radius: 13px; }
+    .player-avatar { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; flex: 0 0 auto; background: #d6ff6224; color: var(--lime); font-weight: 700; }
+    .player-name { font-weight: 600; flex: 1; }
+    .host-tag { color: var(--lime); font: 9px 'DM Mono', monospace; letter-spacing: .08em; }
+    .host-panel { min-height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+    .invite-box { background: #121219; border: 1px dashed #494956; border-radius: 14px; padding: 17px; margin: 18px 0; }
+    .invite-box strong { display: block; margin: 5px 0 2px; font: 22px 'DM Mono', monospace; letter-spacing: .17em; color: var(--lime); }
+    .invite-box p { color: var(--muted); font-size: 12px; margin: 0; }
+    .game-grid { display: grid; grid-template-columns: 235px 1fr; gap: 20px; align-items: stretch; }
+    .tower-card { padding: 20px 16px; }
+    .tower-card h3 { margin: 0 0 14px; font: 10px 'DM Mono', monospace; letter-spacing: .13em; color: #aaaab6; text-transform: uppercase; }
+    .live-tower { display: flex; flex-direction: column-reverse; height: 465px; position: relative; }
+    .live-tower::before { content: ''; position: absolute; top: 10px; bottom: 10px; left: 24px; width: 2px; background: linear-gradient(to top, #41414b, #d6ff6270); }
+    .live-level { flex: 1; border-top: 1px solid #2d2d37; position: relative; display: flex; align-items: center; padding-left: 40px; color: #777783; font: 9px 'DM Mono', monospace; }
+    .live-level:first-child { border-bottom: 1px solid #2d2d37; }
+    .live-level::before { content: ''; position: absolute; z-index: 1; left: 18px; top: 50%; width: 14px; height: 1px; background: #4a4a55; }
+    .live-level.goal { color: var(--lime); }
+    .tower-player { position: absolute; z-index: 2; left: 10px; top: 50%; width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center; color: #13150b; font: 700 10px 'Space Grotesk', sans-serif; background: var(--lime); border: 2px solid #17171e; box-shadow: 0 0 16px #d6ff6240; transition: top .7s cubic-bezier(.2,.8,.2,1); }
+    .tower-player:nth-of-type(2n) { background: #8fe2ff; }
+    .tower-player:nth-of-type(3n) { background: #ff9e86; }
+    .tower-player:nth-of-type(4n) { background: #d7aaff; }
+    .game-main { display: grid; grid-template-rows: auto 1fr; gap: 18px; }
+    .round-bar { display: flex; align-items: center; justify-content: space-between; padding: 17px 21px; }
+    .timer { display: flex; align-items: center; gap: 10px; color: var(--lime); font: 18px 'DM Mono', monospace; }
+    .timer-dot { width: 9px; height: 9px; background: var(--lime); border-radius: 50%; box-shadow: 0 0 12px #d6ff62; }
+    .question-card { padding: clamp(22px, 4vw, 38px); min-height: 350px; display: flex; flex-direction: column; justify-content: center; }
+    .question-card h1 { font-size: clamp(28px, 4vw, 43px); line-height: 1.12; letter-spacing: -.06em; max-width: 680px; margin: 14px 0 24px; }
+    .year-display { display: flex; align-items: baseline; gap: 8px; color: var(--lime); font: 48px 'DM Mono', monospace; margin-bottom: 10px; }
+    .year-display small { color: #83838f; font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .1em; }
+    input[type=range] { width: 100%; accent-color: var(--lime); cursor: pointer; }
+    .range-ends { display: flex; justify-content: space-between; color: #72727f; font: 10px 'DM Mono', monospace; margin-top: 4px; }
+    .answer-actions { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 22px; }
+    .answer-actions .field { max-width: 130px; font: 17px 'DM Mono', monospace; }
+    .waiting-box { border: 1px solid #41414a; background: #13131a; border-radius: 14px; padding: 18px; color: #b5b5c1; margin-top: 18px; }
+    .waiting-box strong { color: var(--lime); }
+    .result-list { display: grid; gap: 9px; margin-top: 20px; }
+    .result-row { display: grid; grid-template-columns: 1fr auto auto; gap: 15px; align-items: center; border-bottom: 1px solid #32323c; padding: 10px 0; }
+    .move-up { color: var(--lime); } .move-down { color: #ff9e86; } .move-flat { color: #a8a8b3; }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: #f5f5f7; color: #17171e; padding: 12px 18px; border-radius: 12px; box-shadow: 0 8px 34px #0008; z-index: 10; font-size: 13px; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; background: #08080dcf; backdrop-filter: blur(8px); }
+    .modal { width: min(520px, 100%); padding: 28px; position: relative; }
+    .modal h2 { font-size: 30px; letter-spacing: -.06em; margin: 6px 0 18px; }
+    .modal-close { position: absolute; top: 18px; right: 18px; }
+    .rules { display: grid; gap: 10px; }
+    .rule { display: grid; grid-template-columns: 80px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid #33333e; font-size: 13px; color: #c0c0ca; }
+    .rule b { color: var(--lime); font: 11px 'DM Mono', monospace; }
+    .footer { border-top: 1px solid #292933; color: #72727f; font: 9px 'DM Mono', monospace; padding: 18px 0 24px; display: flex; justify-content: space-between; letter-spacing: .09em; text-transform: uppercase; }
+    @media (max-width: 800px) { .home-grid { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; } .preview { min-height: 360px; } .lobby-grid { grid-template-columns: 1fr; } .game-grid { grid-template-columns: 1fr; } .tower-card { order: 2; } .live-tower { height: 220px; } .game-main { order: 1; } }
+    @media (max-width: 520px) { .shell { width: min(100% - 24px, 1120px); } .topbar { height: 66px; } .topbar .btn { padding: 9px 11px; font-size: 12px; } .hero h1 { font-size: 51px; } .hero-stats { gap: 18px; } .join-card, .pane { padding: 20px; } .room-top { align-items: flex-start; gap: 10px; flex-direction: column; } .round-bar { padding: 14px; } .answer-actions { align-items: stretch; flex-direction: column; } .answer-actions .field { max-width: none; } .answer-actions .btn { width: 100%; } .result-row { grid-template-columns: 1fr auto; } .result-row span:nth-child(2) { display: none; } .footer { gap: 12px; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="ChronoClimb home"><span class="brand-mark">C</span><span>chrono<span style="color:var(--lime)">climb</span></span></a>
+      <button class="btn btn-quiet" id="rules-button">How to play <span aria-hidden="true">↗</span></button>
+    </header>
+    <main id="app" aria-live="polite"></main>
+    <footer class="footer"><span>CHRONOCLIMB · HISTORY MOVES FAST</span><span>2–8 PLAYERS · 20 SEC ROUNDS</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <div id="modal-root"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    (() => {
+      const socket = io();
+      const app = document.getElementById('app');
+      const toast = document.getElementById('toast');
+      let room = null;
+      let toastTimer;
+      let clockTimer;
+      let selectedYear = 2000;
+      let lastPhase = null;
+      const params = new URLSearchParams(location.search);
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+
+      function esc(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      }
+
+      function setRoom(nextRoom) {
+        room = nextRoom;
+        if (room) {
+          params.set('room', room.code);
+          history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+        }
+        render();
+      }
+
+      function renderHome() {
+        const joinedCode = (params.get('room') || '').toUpperCase();
+        app.innerHTML = `
+          <section class="home-grid">
+            <div class="hero">
+              <div class="eyebrow">A race through the years</div>
+              <h1>Time is your<br><em>rival.</em></h1>
+              <p>Guess the year. Climb the tower. Beat your friends to the top. A little history, a little instinct, and a lot of friendly competition.</p>
+              <div class="hero-stats"><div><strong>10</strong><span>levels to climb</span></div><div><strong>20<span style="font-size:12px"> sec</span></strong><span>per question</span></div><div><strong>2–8</strong><span>players</span></div></div>
+            </div>
+            <div class="card join-card">
+              <div class="eyebrow">Your next game starts here</div>
+              <h2>Make a little history.</h2>
+              <p class="sub">Create a room or join a friend’s climb.</p>
+              <label class="field-label" for="player-name">Your name</label>
+              <input id="player-name" class="field" maxlength="18" placeholder="e.g. Time Traveler" autocomplete="nickname">
+              <button class="btn btn-primary create-btn" id="create-room">Create a room <span aria-hidden="true">↗</span></button>
+              <div class="divider">or join a room</div>
+              <div class="join-row"><input id="room-code" class="field code-field" maxlength="4" placeholder="CODE" value="${esc(joinedCode)}" aria-label="Four letter room code"><button class="btn" id="join-room">Join</button></div>
+            </div>
+            <div class="card preview">
+              <div class="preview-head"><span class="eyebrow">The climb is on</span><span class="live-pill">● LIVE ENERGY</span></div>
+              <div class="mini-tower"><div class="tower-rail">${Array.from({ length: 10 }, (_, i) => `<div class="tower-level ${i === 9 ? 'goal' : ''}">LEVEL ${i + 1}${i === 9 ? ' · GOAL' : ''}</div>`).join('')}<span class="avatar-dot">A</span><span class="avatar-dot second">M</span></div></div>
+              <div class="preview-note"><span>ONE YEAR CAN CHANGE EVERYTHING</span><span>10 / 10</span></div>
+            </div>
+          </section>`;
+        document.getElementById('create-room').onclick = () => socket.emit('room:create', { name: document.getElementById('player-name').value });
+        const join = () => socket.emit('room:join', { name: document.getElementById('player-name').value, code: document.getElementById('room-code').value });
+        document.getElementById('join-room').onclick = join;
+        document.getElementById('room-code').addEventListener('keydown', (event) => { if (event.key === 'Enter') join(); });
+        document.getElementById('room-code').addEventListener('input', (event) => { event.target.value = event.target.value.replace(/[^a-z]/gi, '').toUpperCase(); });
+      }
+
+      function playerRows() {
+        return room.players.map((player) => `<li class="player-row"><span class="player-avatar">${esc(player.name.slice(0, 1).toUpperCase())}</span><span class="player-name">${esc(player.name)}</span>${player.id === room.hostId ? '<span class="host-tag">HOST</span>' : ''}</li>`).join('');
+      }
+
+      function roomHeader() {
+        return `<div class="room-top"><div><div class="eyebrow">${room.phase === 'lobby' ? 'Gather your time travelers' : `Round ${room.round}`}</div><h1 style="font-size:30px;letter-spacing:-.06em;margin:5px 0 0">${room.phase === 'lobby' ? 'Waiting room' : room.phase === 'finished' ? 'The climb is complete' : 'The clock is ticking'}</h1></div><div style="display:flex;gap:9px;align-items:center"><span class="room-code" title="Room code">${esc(room.code)}</span><button class="btn btn-quiet" id="leave-room">Leave</button></div></div>`;
+      }
+
+      function renderLobby() {
+        const isHost = room.hostId === socket.id;
+        app.innerHTML = `<section class="view">${roomHeader()}<div class="lobby-grid"><div class="card pane"><div class="eyebrow">${room.players.length} / 8 players</div><h2>Who’s climbing?</h2><p class="muted" style="margin:0;font-size:13px">Share the code and bring your crew into the room.</p><ul class="player-list">${playerRows()}</ul></div><div class="card pane host-panel"><div><div class="eyebrow">Ready when you are</div><h2>Race to level 10.</h2><p class="muted" style="margin:0;font-size:13px;line-height:1.55">Each round is a new event. Get close to the year and you’ll rise; miss by a lot and you may slide back.</p><div class="invite-box"><span class="eyebrow">ROOM CODE</span><strong>${esc(room.code)}</strong><p>Anyone with this code can join while the lobby is open.</p></div></div><div>${isHost ? `<button class="btn btn-primary" id="start-game" style="width:100%" ${room.players.length < 2 ? 'disabled' : ''}>Start the climb <span aria-hidden="true">↗</span></button><p class="muted" style="font-size:11px;margin:9px 0 0;text-align:center">${room.players.length < 2 ? 'Waiting for one more player' : 'All aboard. Good luck.'}</p>` : '<p class="muted" style="font-size:12px;margin:0">The host will start when everyone is ready.</p>'}</div></div></div></section>`;
+        const start = document.getElementById('start-game');
+        if (start) start.onclick = () => socket.emit('game:start');
+        bindLeave();
+      }
+
+      function renderTower() {
+        return `<div class="card tower-card"><h3>Live tower · ${room.players.length} climbers</h3><div class="live-tower">${Array.from({ length: 10 }, (_, i) => `<div class="live-level ${i === 9 ? 'goal' : ''}">LEVEL ${i + 1}${i === 9 ? ' · FINISH' : ''}</div>`).join('')}${room.players.map((player, index) => `<span class="tower-player" style="top:calc(${(10 - player.level) * 10}% + 8px);left:${10 + (index % 3) * 17}px" title="${esc(player.name)} · Level ${player.level}">${esc(player.name.slice(0, 1).toUpperCase())}</span>`).join('')}</div></div>`;
+      }
+
+      function renderQuestion() {
+        const me = room.players.find((player) => player.id === socket.id);
+        const locked = Boolean(me && me.submitted);
+        const time = Math.max(0, Math.ceil((room.endsAt - Date.now()) / 1000));
+        return `<div class="game-main"><div class="card round-bar"><div><div class="eyebrow">Round ${room.round} <span style="color:#70707b">/ ${room.totalPrompts}</span></div><div style="font-weight:600;margin-top:4px">Lock in your year</div></div><div class="timer"><span class="timer-dot"></span><span id="timer-value">${time}s</span></div></div><div class="card question-card"><div class="eyebrow">${esc(room.prompt.category || 'HISTORY')} · WHAT YEAR?</div><h1>${esc(room.prompt.event)}</h1>${locked ? `<div class="waiting-box"><strong>Guess locked: ${me.submitted ? '✓' : ''}</strong> You’re in. Waiting for the other climbers…</div>` : `<div class="year-display"><span id="year-value">${selectedYear}</span><small>your guess</small></div><input id="year-slider" type="range" min="1000" max="2026" step="1" value="${selectedYear}" aria-label="Guess the year"><div class="range-ends"><span>1000</span><span>2026</span></div><div class="answer-actions"><input id="year-number" class="field" type="number" min="1000" max="2026" value="${selectedYear}" aria-label="Enter your year"><button id="submit-guess" class="btn btn-primary">Lock in my guess <span aria-hidden="true">↗</span></button></div>`}</div></div>`;
+      }
+
+      function movementClass(value) { return value > 0 ? 'move-up' : value < 0 ? 'move-down' : 'move-flat'; }
+      function movementText(value) { return value > 0 ? `+${value}` : String(value); }
+
+      function renderReveal(finished = false) {
+        const me = room.players.find((player) => player.id === socket.id);
+        const result = me && room.results ? room.results.find((row) => row.playerId === me.id) : null;
+        const winner = room.players.find((player) => player.id === room.winner);
+        const time = Math.max(0, Math.ceil(((finished ? Date.now() : room.revealEndsAt) - Date.now()) / 1000));
+        const rows = (room.results || []).slice().sort((a, b) => b.level - a.level).map((row) => `<div class="result-row"><strong>${esc(row.name)}</strong><span class="muted mono">${row.guess === null ? '—' : `${row.guess} · ${row.distance}y off`}</span><strong class="${movementClass(row.movement)}">${movementText(row.movement)} ${row.movement > 0 ? '↑' : row.movement < 0 ? '↓' : '—'}</strong></div>`).join('');
+        return `<div class="game-main"><div class="card round-bar"><div><div class="eyebrow">${finished ? 'GAME OVER' : `ROUND ${room.round} REVEAL`}</div><div style="font-weight:600;margin-top:4px">${finished ? 'The summit has a new champion.' : 'How did everyone do?'}</div></div><div class="timer"><span class="timer-dot"></span><span id="timer-value">${finished ? '★' : `${time}s`}</span></div></div><div class="card question-card"><div class="eyebrow">${esc(room.prompt.category || 'HISTORY')} · THE ANSWER</div><h1 style="font-size:clamp(23px,3vw,33px);margin-bottom:12px">${esc(room.prompt.event)}</h1><div class="year-display" style="font-size:38px">${room.answerYear}</div><div class="waiting-box" style="margin-top:0"><strong>Correct year: ${room.answerYear}</strong>${result ? ` · ${esc(result.label)}${result.distance !== null ? ` — ${result.distance} year${result.distance === 1 ? '' : 's'} off` : ''}` : ''}${finished && winner ? `<br><span style="color:#fff">🏆 ${esc(winner.name)} wins the climb!</span>` : ''}</div><div class="result-list">${rows}</div>${finished ? `<button class="btn" id="leave-room" style="margin-top:20px">Back to home</button>` : ''}</div></div>`;
+      }
+
+      function renderGame() {
+        const isReveal = room.phase === 'reveal' || room.phase === 'finished';
+        app.innerHTML = `<section class="view">${roomHeader()}<div class="game-grid">${renderTower()}${isReveal ? renderReveal(room.phase === 'finished') : renderQuestion()}</div></section>`;
+        if (room.phase === 'playing') {
+          const slider = document.getElementById('year-slider');
+          const number = document.getElementById('year-number');
+          if (slider && number) {
+            slider.oninput = () => { selectedYear = Number(slider.value); number.value = selectedYear; document.getElementById('year-value').textContent = selectedYear; };
+            number.oninput = () => { selectedYear = Math.max(1000, Math.min(2026, Number(number.value) || 1000)); slider.value = selectedYear; document.getElementById('year-value').textContent = selectedYear; };
+            document.getElementById('submit-guess').onclick = () => socket.emit('guess:submit', { year: selectedYear });
+          }
+        }
+        bindLeave();
+      }
+
+      function bindLeave() {
+        const button = document.getElementById('leave-room');
+        if (!button) return;
+        button.onclick = () => { socket.emit('room:leave'); room = null; lastPhase = null; params.delete('room'); history.replaceState({}, '', location.pathname); render(); };
+      }
+
+      function render() {
+        clearInterval(clockTimer);
+        if (!room) renderHome();
+        else if (room.phase === 'lobby') renderLobby();
+        else renderGame();
+        if (room && (room.phase === 'playing' || room.phase === 'reveal')) {
+          clockTimer = setInterval(() => {
+            const clock = document.getElementById('timer-value');
+            if (!clock) return;
+            const end = room.phase === 'playing' ? room.endsAt : room.revealEndsAt;
+            clock.textContent = `${Math.max(0, Math.ceil((end - Date.now()) / 1000))}s`;
+          }, 250);
+        }
+      }
+
+      socket.on('room:update', (nextRoom) => {
+        if (lastPhase !== nextRoom.phase && nextRoom.phase === 'reveal') selectedYear = 2000;
+        lastPhase = nextRoom.phase;
+        setRoom(nextRoom);
+      });
+      socket.on('notice', showToast);
+      socket.on('connect', () => {
+        const code = params.get('room');
+        if (code && !room) {
+          const cachedName = localStorage.getItem('chronoclimb-name');
+          if (cachedName) socket.emit('room:join', { name: cachedName, code });
+        }
+      });
+      document.addEventListener('input', (event) => {
+        if (event.target.id === 'player-name') localStorage.setItem('chronoclimb-name', event.target.value);
+      });
+      document.getElementById('rules-button').onclick = () => {
+        document.getElementById('modal-root').innerHTML = `<div class="modal-backdrop" id="modal-backdrop"><div class="card modal" role="dialog" aria-modal="true" aria-labelledby="rules-title"><button class="btn btn-quiet modal-close" id="close-rules" aria-label="Close">✕</button><div class="eyebrow">Quick rules</div><h2 id="rules-title">Climb through time.</h2><div class="rules"><div class="rule"><b>20 SECONDS</b><span>Guess the year shown by the event. Use the slider or type a year.</span></div><div class="rule"><b>EXACT · +2</b><span>Nail the year and leap two levels. Within 3 years earns +1.</span></div><div class="rule"><b>4–10 · 0</b><span>Stay in place. 11–24 years off drops one level; 25+ drops two.</span></div><div class="rule"><b>FIRST TO 10</b><span>Reach the summit to win. Same-round summit ties go to the closest guess.</span></div></div><p class="muted" style="font-size:11px;margin:18px 0 0">Miss a round? You drop one level. You can’t fall below level 1.</p></div></div>`;
+        document.getElementById('close-rules').onclick = () => document.getElementById('modal-root').innerHTML = '';
+        document.getElementById('modal-backdrop').onclick = (event) => { if (event.target.id === 'modal-backdrop') document.getElementById('modal-root').innerHTML = ''; };
+      };
+      render();
+    })();
+  </script>
+</body>
+</html>
